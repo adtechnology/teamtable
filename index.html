@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Table Assigner</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .team {
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .team.visible {
+            opacity: 1;
+        }
+        .green {
+            background-color: green;
+            color: white;
+        }
+        .yellow {
+            background-color: yellow;
+            color: black;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Team Table Assigner</h1>
+    <div class="container">
+        <div id="teamA" class="team"></div>
+        <div id="teamB" class="team"></div>
+    </div>
+    <button onclick="assignTeams()">Assign Teams</button>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="loader"></div>
+            <p>Assigning teams, please wait...</p>
+        </div>
+    </div>
+
+    <script>
+        function assignTeams() {
+            const colors = ['green', 'yellow'];
+            const teamA = document.getElementById('teamA');
+            const teamB = document.getElementById('teamB');
+            const modal = document.getElementById('myModal');
+
+            teamA.classList.remove('visible');
+            teamB.classList.remove('visible');
+            modal.style.display = 'flex';
+
+            setTimeout(() => {
+                const teamAColor = colors[Math.floor(Math.random() * colors.length)];
+                const teamBColor = teamAColor === 'green' ? 'yellow' : 'green';
+
+                teamA.className = 'team ' + teamAColor;
+                teamA.innerText = 'Team A';
+                teamA.classList.add('visible');
+
+                teamB.className = 'team ' + teamBColor;
+                teamB.innerText = 'Team B';
+                teamB.classList.add('visible');
+
+                modal.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
