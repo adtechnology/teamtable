@@ -192,6 +192,25 @@
             padding: 10px;
             margin-bottom: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .result-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .result-team.green {
+            background-color: green;
+            color: white;
+        }
+        .result-team.yellow {
+            background-color: yellow;
+            color: black;
         }
         .dark-mode .results {
             background-color: #44475a;
@@ -204,6 +223,14 @@
             background: #6272a4;
             border-color: #6272a4;
             color: #f8f8f2;
+        }
+        .dark-mode .result-team.green {
+            background-color: #50fa7b;
+            color: #282a36;
+        }
+        .dark-mode .result-team.yellow {
+            background-color: #f1fa8c;
+            color: #282a36;
         }
     </style>
 </head>
@@ -306,7 +333,11 @@
 
             results.forEach(result => {
                 const li = document.createElement('li');
-                li.textContent = `${result.date}: Team A (${result.teamA}, ${result.colorA}), Team B (${result.teamB}, ${result.colorB})`;
+                li.innerHTML = `
+                    <div>${result.date}</div>
+                    <div class="result-team ${result.colorA}">${result.teamA}</div>
+                    <div class="result-team ${result.colorB}">${result.teamB}</div>
+                `;
                 resultsList.appendChild(li);
             });
         }
