@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,13 +9,10 @@
         body {
             font-family: 'Open Sans', sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
             margin: 0;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            transition: background 0.3s;
+            transition: background 0.3s, color 0.3s;
         }
         h1 {
             font-size: 2.5em;
@@ -28,6 +24,20 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
+            flex: 1;
+        }
+        .main-content {
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
         }
         .row {
             display: flex;
@@ -123,60 +133,110 @@
             border-color: #007bff;
         }
         .dark-mode {
-            background: #121212;
-            color: #ffffff;
+            background: #282a36;
+            color: #f8f8f2;
         }
         .dark-mode h1 {
-            color: #ffffff;
+            color: #f8f8f2;
         }
         .dark-mode .modal-content {
-            background: #333;
-            color: #ffffff;
+            background: #44475a;
+            color: #f8f8f2;
+            border-color: #6272a4;
         }
         .dark-mode button {
-            background-color: #444;
+            background-color: #6272a4;
         }
         .dark-mode button:hover {
-            background-color: #555;
+            background-color: #50fa7b;
         }
         .dark-mode .dropdown {
-            background: #444;
-            color: #fff;
-            border: 1px solid #555;
+            background: #44475a;
+            color: #f8f8f2;
+            border: 1px solid #6272a4;
         }
         .dark-mode .dropdown:focus {
-            border-color: #888;
+            border-color: #50fa7b;
         }
         .top-right {
             position: absolute;
             top: 20px;
             right: 20px;
+            background-color: #44475a;
+            color: #f8f8f2;
+        }
+        .results {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .results h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+            color: #333;
+            text-align: center;
+        }
+        .results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .results li {
+            background: #f5f7fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .dark-mode .results {
+            background-color: #44475a;
+            color: #f8f8f2;
+        }
+        .dark-mode .results h2 {
+            color: #f8f8f2;
+        }
+        .dark-mode .results li {
+            background: #6272a4;
+            border-color: #6272a4;
+            color: #f8f8f2;
         }
     </style>
 </head>
 <body>
     <button class="top-right" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-    <h1>Team Table Assigner</h1>
-    <div class="container">
-        <div class="row">
-            <select id="teamSelectA" class="dropdown">
-                <option value="Advertising">Advertising</option>
-                <option value="Ad Technology">Ad Technology</option>
-                <option value="BI">BI</option>
-                <option value="OTT">OTT</option>
-            </select>
-            <select id="teamSelectB" class="dropdown">
-                <option value="Advertising">Advertising</option>
-                <option value="Ad Technology">Ad Technology</option>
-                <option value="BI">BI</option>
-                <option value="OTT">OTT</option>
-            </select>
+    <div class="main-content">
+        <div class="controls">
+            <h1>Team Table Assigner</h1>
+            <input type="date" id="datePicker" class="dropdown">
+            <div class="row">
+                <select id="teamSelectA" class="dropdown">
+                    <option value="Advertising">Advertising</option>
+                    <option value="Ad Technology">Ad Technology</option>
+                    <option value="BI">BI</option>
+                    <option value="OTT">OTT</option>
+                </select>
+                <select id="teamSelectB" class="dropdown">
+                    <option value="Advertising">Advertising</option>
+                    <option value="Ad Technology">Ad Technology</option>
+                    <option value="BI">BI</option>
+                    <option value="OTT">OTT</option>
+                </select>
+            </div>
+            <div class="row">
+                <div id="teamA" class="team"></div>
+                <div id="teamB" class="team"></div>
+            </div>
+            <button onclick="assignTeams()">Assign Teams</button>
         </div>
-        <div class="row">
-            <div id="teamA" class="team"></div>
-            <div id="teamB" class="team"></div>
+        <div class="results" id="results">
+            <h2>Results</h2>
+            <ul id="resultsList"></ul>
         </div>
-        <button onclick="assignTeams()">Assign Teams</button>
     </div>
 
     <div id="myModal" class="modal">
@@ -195,6 +255,12 @@
 
             const selectedTeamA = document.getElementById('teamSelectA').value;
             const selectedTeamB = document.getElementById('teamSelectB').value;
+            const selectedDate = document.getElementById('datePicker').value;
+
+            if (!selectedDate) {
+                alert('Please select a date.');
+                return;
+            }
 
             teamA.classList.remove('visible');
             teamB.classList.remove('visible');
@@ -212,8 +278,37 @@
                 teamB.innerText = selectedTeamB;
                 teamB.classList.add('visible');
 
+                saveResult(selectedDate, selectedTeamA, teamAColor, selectedTeamB, teamBColor);
+                displayResults();
+
                 modal.style.display = 'none';
             }, 5000);
+        }
+
+        function saveResult(date, teamA, colorA, teamB, colorB) {
+            const result = {
+                date,
+                teamA,
+                colorA,
+                teamB,
+                colorB
+            };
+
+            let results = JSON.parse(localStorage.getItem('results')) || [];
+            results.push(result);
+            localStorage.setItem('results', JSON.stringify(results));
+        }
+
+        function displayResults() {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            const results = JSON.parse(localStorage.getItem('results')) || [];
+
+            results.forEach(result => {
+                const li = document.createElement('li');
+                li.textContent = `${result.date}: Team A (${result.teamA}, ${result.colorA}), Team B (${result.teamB}, ${result.colorB})`;
+                resultsList.appendChild(li);
+            });
         }
 
         function toggleDarkMode() {
@@ -229,7 +324,10 @@
             }
         }
 
-        window.onload = loadDarkMode;
+        window.onload = () => {
+            loadDarkMode();
+            displayResults();
+        };
     </script>
 </body>
 </html>
