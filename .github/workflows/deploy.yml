@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Create public directory
+        run: mkdir -p public
+
       - name: Create AWS config file
         run: |
           echo "<script>" > public/aws-config.js
