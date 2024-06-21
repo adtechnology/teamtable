@@ -237,6 +237,7 @@
     </style>
 </head>
 <body>
+<!-- HTML Content -->
 <button class="top-right" onclick="toggleDarkMode()">Toggle Dark Mode</button>
 <div class="main-content">
     <div class="controls">
@@ -280,13 +281,12 @@
     AWS.config.update({
         accessKeyId: window.AWS_ACCESS_KEY_ID,
         secretAccessKey: window.AWS_SECRET_ACCESS_KEY,
-        region: 'eu-central-1' // ERSETZE DIESEN WERT
+        region: 'eu-central-1' // Ersetze dies durch deine tatsächliche Region
     });
 
     const s3 = new AWS.S3();
-    const BUCKET_NAME = 'teamtable-results'; // ERSETZE DIESEN WERT
+    const BUCKET_NAME = 'teamtable-results'; // Ersetze dies durch deinen tatsächlichen Bucket-Namen
     const FILE_NAME = 'results.json';
-
 
     async function saveResult(date, teamA, colorA, teamB, colorB) {
         const result = { date, teamA, colorA, teamB, colorB };
