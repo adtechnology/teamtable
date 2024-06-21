@@ -1,2 +1,6 @@
-window.AWS_ACCESS_KEY_ID = '${{ secrets.AWS_ACCESS_KEY_ID }}';
-window.AWS_SECRET_ACCESS_KEY = '${{ secrets.AWS_SECRET_ACCESS_KEY }}';
+// Configure AWS SDK
+AWS.config.update({
+    accessKeyId: window.AWS_ACCESS_KEY_ID,
+    secretAccessKey: window.AWS_SECRET_ACCESS_KEY,
+    region: 'your-region' // ERSETZE DIESEN WERT
+});
