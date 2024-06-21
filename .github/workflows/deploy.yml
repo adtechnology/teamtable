@@ -18,19 +18,13 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build the project
-        run: npm run build
+      - name: Create AWS config file
+        run: |
+          echo "window.AWS_ACCESS_KEY_ID = '${{ secrets.AWS_ACCESS_KEY_ID }}';" > public/aws-config.js
+          echo "window.AWS_SECRET_ACCESS_KEY = '${{ secrets.AWS_SECRET_ACCESS_KEY }}';" >> public/aws-config.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-
-      - name: Configure AWS SDK
-        run: |
-          echo "window.AWS_ACCESS_KEY_ID = '${{ secrets.AWS_ACCESS_KEY_ID }}';" >> public/aws-config.js
-          echo "window.AWS_SECRET_ACCESS_KEY = '${{ secrets.AWS_SECRET_ACCESS_KEY }}';" >> public/aws-config.js
