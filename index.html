@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Table Assigner</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.799.0.min.js"></script>
-    <script src="aws-config.js"></script>
     <style>
         body {
             font-family: 'Open Sans', sans-serif;
@@ -237,168 +236,130 @@
     </style>
 </head>
 <body>
-<!-- HTML Content -->
-<button class="top-right" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-<div class="main-content">
-    <div class="controls">
-        <h1>Team Table Assigner</h1>
-        <input type="date" id="datePicker" class="dropdown">
-        <div class="row">
-            <select id="teamSelectA" class="dropdown">
-                <option value="Advertising">Advertising</option>
-                <option value="Ad Technology">Ad Technology</option>
-                <option value="BI">BI</option>
-                <option value="OTT">OTT</option>
-            </select>
-            <select id="teamSelectB" class="dropdown">
-                <option value="Advertising">Advertising</option>
-                <option value="Ad Technology">Ad Technology</option>
-                <option value="BI">BI</option>
-                <option value="OTT">OTT</option>
-            </select>
+    <button class="top-right" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <div class="main-content">
+        <div class="controls">
+            <h1>Team Table Assigner</h1>
+            <input type="date" id="datePicker" class="dropdown">
+            <div class="row">
+                <select id="teamSelectA" class="dropdown">
+                    <option value="Advertising">Advertising</option>
+                    <option value="Ad Technology">Ad Technology</option>
+                    <option value="BI">BI</option>
+                    <option value="OTT">OTT</option>
+                </select>
+                <select id="teamSelectB" class="dropdown">
+                    <option value="Advertising">Advertising</option>
+                    <option value="Ad Technology">Ad Technology</option>
+                    <option value="BI">BI</option>
+                    <option value="OTT">OTT</option>
+                </select>
+            </div>
+            <div class="row">
+                <div id="teamA" class="team"></div>
+                <div id="teamB" class="team"></div>
+            </div>
+            <button onclick="assignTeams()">Assign Teams</button>
         </div>
-        <div class="row">
-            <div id="teamA" class="team"></div>
-            <div id="teamB" class="team"></div>
+        <div class="results" id="results">
+            <h2>Results</h2>
+            <ul id="resultsList"></ul>
         </div>
-        <button onclick="assignTeams()">Assign Teams</button>
     </div>
-    <div class="results" id="results">
-        <h2>Results</h2>
-        <ul id="resultsList"></ul>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="loader"></div>
+            <p>Assigning teams, please wait...</p>
+        </div>
     </div>
-</div>
 
-<div id="myModal" class="modal">
-    <div class="modal-content">
-        <div class="loader"></div>
-        <p>Assigning teams, please wait...</p>
-    </div>
-</div>
+    <script>
+        function assignTeams() {
+            const colors = ['green', 'yellow'];
+            const teamA = document.getElementById('teamA');
+            const teamB = document.getElementById('teamB');
+            const modal = document.getElementById('myModal');
 
-<script>
-    // Configure AWS SDK
-    AWS.config.update({
-        accessKeyId: window.AWS_ACCESS_KEY_ID,
-        secretAccessKey: window.AWS_SECRET_ACCESS_KEY,
-        region: 'eu-central-1' // Ersetze dies durch deine tatsächliche Region
-    });
+            const selectedTeamA = document.getElementById('teamSelectA').value;
+            const selectedTeamB = document.getElementById('teamSelectB').value;
+            const selectedDate = document.getElementById('datePicker').value;
 
-    const s3 = new AWS.S3();
-    const BUCKET_NAME = 'teamtable-results'; // Ersetze dies durch deinen tatsächlichen Bucket-Namen
-    const FILE_NAME = 'results.json';
-
-    async function saveResult(date, teamA, colorA, teamB, colorB) {
-        const result = { date, teamA, colorA, teamB, colorB };
-        let results = await getResults();
-
-        results.push(result);
-        const params = {
-            Bucket: BUCKET_NAME,
-            Key: FILE_NAME,
-            Body: JSON.stringify(results),
-            ContentType: 'application/json'
-        };
-
-        try {
-            await s3.putObject(params).promise();
-            fetchResults();
-        } catch (error) {
-            console.error('Error saving data to S3:', error);
-        }
-    }
-
-    async function getResults() {
-        const params = {
-            Bucket: BUCKET_NAME,
-            Key: FILE_NAME
-        };
-
-        try {
-            const data = await s3.getObject(params).promise();
-            return JSON.parse(data.Body.toString('utf-8'));
-        } catch (error) {
-            if (error.code === 'NoSuchKey') {
-                return [];
+            if (!selectedDate) {
+                alert('Please select a date.');
+                return;
             }
-            console.error('Error fetching data from S3:', error);
-            return [];
+
+            teamA.classList.remove('visible');
+            teamB.classList.remove('visible');
+            modal.style.display = 'flex';
+
+            setTimeout(() => {
+                const teamAColor = colors[Math.floor(Math.random() * colors.length)];
+                const teamBColor = teamAColor === 'green' ? 'yellow' : 'green';
+
+                teamA.className = 'team ' + teamAColor;
+                teamA.innerText = selectedTeamA;
+                teamA.classList.add('visible');
+
+                teamB.className = 'team ' + teamBColor;
+                teamB.innerText = selectedTeamB;
+                teamB.classList.add('visible');
+
+                saveResult(selectedDate, selectedTeamA, teamAColor, selectedTeamB, teamBColor);
+                displayResults();
+
+                modal.style.display = 'none';
+            }, 5000);
         }
-    }
 
-    async function fetchResults() {
-        const results = await getResults();
-        displayResults(results);
-    }
+        function saveResult(date, teamA, colorA, teamB, colorB) {
+            const result = {
+                date,
+                teamA,
+                colorA,
+                teamB,
+                colorB
+            };
 
-    function displayResults(results) {
-        const resultsList = document.getElementById('resultsList');
-        resultsList.innerHTML = '';
+            let results = JSON.parse(localStorage.getItem('results')) || [];
+            results.push(result);
+            localStorage.setItem('results', JSON.stringify(results));
+        }
 
-        results.forEach(result => {
-            const li = document.createElement('li');
-            li.innerHTML = `
+        function displayResults() {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            const results = JSON.parse(localStorage.getItem('results')) || [];
+
+            results.forEach(result => {
+                const li = document.createElement('li');
+                li.innerHTML = `
                     <div>${result.date}</div>
                     <div class="result-team ${result.colorA}">${result.teamA}</div>
                     <div class="result-team ${result.colorB}">${result.teamB}</div>
                 `;
-            resultsList.appendChild(li);
-        });
-    }
-
-    function assignTeams() {
-        const colors = ['green', 'yellow'];
-        const teamA = document.getElementById('teamA');
-        const teamB = document.getElementById('teamB');
-        const modal = document.getElementById('myModal');
-
-        const selectedTeamA = document.getElementById('teamSelectA').value;
-        const selectedTeamB = document.getElementById('teamSelectB').value;
-        const selectedDate = document.getElementById('datePicker').value;
-
-        if (!selectedDate) {
-            alert('Please select a date.');
-            return;
+                resultsList.appendChild(li);
+            });
         }
 
-        teamA.classList.remove('visible');
-        teamB.classList.remove('visible');
-        modal.style.display = 'flex';
-
-        setTimeout(() => {
-            const teamAColor = colors[Math.floor(Math.random() * colors.length)];
-            const teamBColor = teamAColor === 'green' ? 'yellow' : 'green';
-
-            teamA.className = 'team ' + teamAColor;
-            teamA.innerText = selectedTeamA;
-            teamA.classList.add('visible');
-
-            teamB.className = 'team ' + teamBColor;
-            teamB.innerText = selectedTeamB;
-            teamB.classList.add('visible');
-
-            saveResult(selectedDate, selectedTeamA, teamAColor, selectedTeamB, teamBColor);
-            modal.style.display = 'none';
-        }, 5000);
-    }
-
-    function toggleDarkMode() {
-        const body = document.body;
-        body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
-    }
-
-    function loadDarkMode() {
-        const darkMode = localStorage.getItem('darkMode') === 'true';
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
         }
-    }
 
-    window.onload = async () => {
-        loadDarkMode();
-        await fetchResults();
-    };
-</script>
+        function loadDarkMode() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
+        window.onload = () => {
+            loadDarkMode();
+            displayResults();
+        };
+    </script>
 </body>
 </html>
