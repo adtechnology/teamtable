@@ -18,13 +18,12 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Create public directory
-        run: mkdir -p public
-
       - name: Create AWS config file
         run: |
-          echo "window.AWS_ACCESS_KEY_ID = '${{ secrets.AWS_ACCESS_KEY_ID }}';" > public/aws-config.js
+          echo "<script>" > public/aws-config.js
+          echo "window.AWS_ACCESS_KEY_ID = '${{ secrets.AWS_ACCESS_KEY_ID }}';" >> public/aws-config.js
           echo "window.AWS_SECRET_ACCESS_KEY = '${{ secrets.AWS_SECRET_ACCESS_KEY }}';" >> public/aws-config.js
+          echo "</script>" >> public/aws-config.js
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
